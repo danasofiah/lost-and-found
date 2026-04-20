@@ -25,7 +25,7 @@ async function addItem() {
     // upload image
     const { error: uploadError } = await client
       .storage
-      .from("images")
+      .from("image")
       .upload(fileName, imageFile);
 
     if (uploadError) {
@@ -37,7 +37,7 @@ async function addItem() {
     // get URL
     const { data: urlData } = client
       .storage
-      .from("images")
+      .from("image")
       .getPublicUrl(fileName);
 
     const imageUrl = urlData.publicUrl;
