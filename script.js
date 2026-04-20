@@ -1,5 +1,5 @@
-const supabaseUrl = "https://ixztiesdlechcemjukkc.supabase.co";
-const supabaseKey = "sb_publishable_DncSJwEji60UuWaoZ3VdIA_VT_01qqm";
+const client = "https://ixztiesdlechcemjukkc.supabase.co";
+const client = "sb_publishable_DncSJwEji60UuWaoZ3VdIA_VT_01qqm";
 
 // ✅ FIX: use client instead of supabase
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
