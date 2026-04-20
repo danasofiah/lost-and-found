@@ -1,7 +1,7 @@
-const client = "https://ixztiesdlechcemjukkc.supabase.co";
-const client = "sb_publishable_DncSJwEji60UuWaoZ3VdIA_VT_01qqm";
+const supabaseUrl = "https://ixztiesdlechcemjukkc.supabase.co";
+const supabaseKey = "sb_publishable_DncSJwEji60UuWaoZ3VdIA_VT_01qqm";
 
-// ✅ FIX: use client instead of supabase
+// ✅ correct client creation
 const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // =====================
@@ -20,9 +20,9 @@ async function addItem() {
   }
 
   try {
-    // 1. Upload image to Supabase Storage
     const fileName = Date.now() + "_" + imageFile.name;
 
+    // upload image
     const { error: uploadError } = await client
       .storage
       .from("images")
@@ -34,7 +34,7 @@ async function addItem() {
       return;
     }
 
-    // 2. Get public URL
+    // get URL
     const { data: urlData } = client
       .storage
       .from("images")
@@ -42,7 +42,7 @@ async function addItem() {
 
     const imageUrl = urlData.publicUrl;
 
-    // 3. Insert into database
+    // insert data
     const { error } = await client
       .from("items")
       .insert([{
@@ -62,7 +62,7 @@ async function addItem() {
     }
 
   } catch (err) {
-    console.error("FULL ERROR:", err);
+    console.error(err);
     alert(err.message || "Something went wrong");
   }
 }
@@ -107,12 +107,12 @@ async function displayItems() {
 }
 
 // =====================
-// 🔄 LIVE SEARCH
+// 🔄 EVENTS
 // =====================
 document.getElementById("search").addEventListener("input", displayItems);
 document.getElementById("filterCategory").addEventListener("change", displayItems);
 
 // =====================
-// 🚀 INITIAL LOAD
+// 🚀 INIT
 // =====================
 displayItems();
