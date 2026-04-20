@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Campus Lost & Found</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🎒 Campus Lost & Found</h1>
+
+<div class="form">
+  <h2>Report Found Item</h2>
+
+  <input type="text" id="title" placeholder="Item name"><br>
+
+  <select id="category">
+    <option value="">Select Category</option>
+    <option>Phone</option>
+    <option>Wallet</option>
+    <option>Bag</option>
+    <option>Keys</option>
+    <option>Others</option>
+  </select><br>
+
+  <input type="text" id="location" placeholder="Where found"><br>
+  <input type="text" id="contact" placeholder="Your contact"><br>
+  <input type="file" id="image"><br><br>
+
+  <button onclick="addItem()">Submit</button>
+</div>
+
+<div class="filters">
+  <input type="text" id="search" placeholder="Search items..." onkeyup="displayItems()">
+
+  <select id="filterCategory" onchange="displayItems()">
+    <option value="">All Categories</option>
+    <option>Phone</option>
+    <option>Wallet</option>
+    <option>Bag</option>
+    <option>Keys</option>
+    <option>Others</option>
+  </select>
+</div>
+
+<h2>Items</h2>
+<div id="items"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
