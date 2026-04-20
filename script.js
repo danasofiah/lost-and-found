@@ -2,6 +2,9 @@ const supabaseUrl = "https://ixztiesdlechcemjukkc.supabase.co";
 const supabaseKey = "sb_publishable_DncSJwEji60UuWaoZ3VdIA_VT_01qqm";
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+// =====================
+// 🧠 ADD ITEM (FIXED)
+// =====================
 async function addItem() {
   const title = document.getElementById("title").value;
   const category = document.getElementById("category").value;
@@ -10,55 +13,61 @@ async function addItem() {
   const imageFile = document.getElementById("image").files[0];
 
   if (!title || !category || !imageFile) {
-    alert("Please fill all fields");
+    alert("Please fill all required fields");
     return;
   }
 
-  const reader = new FileReader();
+  try {
+    // 1. Upload image to Supabase Storage
+    const fileName = Date.now() + "_" + imageFile.name;
 
-  reader.onload = async function () {
-    const img = new Image();
-    img.src = reader.result;
+    const { error: uploadError } = await supabase
+      .storage
+      .from("images") // must exist
+      .upload(fileName, imageFile);
 
-    img.onload = async function () {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
+    if (uploadError) {
+      console.log(uploadError);
+      alert("Image upload failed");
+      return;
+    }
 
-      // compress image
-      const maxWidth = 300;
-      const scale = maxWidth / img.width;
+    // 2. Get public URL
+    const { data: urlData } = supabase
+      .storage
+      .from("images")
+      .getPublicUrl(fileName);
 
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
+    const imageUrl = urlData.publicUrl;
 
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // 3. Insert into database
+    const { error } = await supabase
+      .from("items")
+      .insert([{
+        title,
+        category,
+        location,
+        contact,
+        image: imageUrl
+      }]);
 
-      const compressedImage = canvas.toDataURL("image/jpeg", 0.5);
+    if (error) {
+      console.log(error);
+      alert(error.message);
+    } else {
+      alert("Upload successful!");
+      displayItems();
+    }
 
-      const { error } = await supabase
-        .from("items")
-        .insert([{
-          title,
-          category,
-          location,
-          contact,
-          image: compressedImage
-        }]);
-
-      if (error) {
-        alert(error.message);
-        console.log(error);
-      } else {
-        alert("Upload successful!");
-        displayItems();
-      }
-    };
-  };
-
-  reader.readAsDataURL(imageFile);
+  } catch (err) {
+    console.log(err);
+    alert("Something went wrong");
+  }
 }
 
+// =====================
 // 🧠 DISPLAY ITEMS
+// =====================
 async function displayItems() {
   const container = document.getElementById("items");
   const search = document.getElementById("search").value.toLowerCase();
@@ -66,7 +75,10 @@ async function displayItems() {
 
   container.innerHTML = "";
 
-  const { data, error } = await supabase.from("items").select("*");
+  const { data, error } = await supabase
+    .from("items")
+    .select("*")
+    .order("id", { ascending: false });
 
   if (error) {
     console.log(error);
@@ -75,20 +87,30 @@ async function displayItems() {
 
   data.forEach(item => {
     const matchSearch = item.title.toLowerCase().includes(search);
-    const matchCategory = filterCategory === "" || item.category === filterCategory;
+    const matchCategory =
+      filterCategory === "" || item.category === filterCategory;
 
     if (matchSearch && matchCategory) {
       container.innerHTML += `
         <div class="card">
-          <img src="${item.image}">
+          <img src="${item.image}" style="width:100%; border-radius:10px;">
           <h3>${item.title}</h3>
           <p>🏷 ${item.category}</p>
-          <p>📍 ${item.location}</p>
-          <p>📞 ${item.contact}</p>
+          <p>📍 ${item.location || "-"}</p>
+          <p>📞 ${item.contact || "-"}</p>
         </div>
       `;
     }
   });
 }
 
+// =====================
+// 🔄 LIVE SEARCH
+// =====================
+document.getElementById("search").addEventListener("input", displayItems);
+document.getElementById("filterCategory").addEventListener("change", displayItems);
+
+// =====================
+// 🚀 INITIAL LOAD
+// =====================
 displayItems();
