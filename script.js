@@ -1,9 +1,11 @@
 const supabaseUrl = "https://ixztiesdlechcemjukkc.supabase.co";
 const supabaseKey = "sb_publishable_DncSJwEji60UuWaoZ3VdIA_VT_01qqm";
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// ✅ FIX: use client instead of supabase
+const client = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // =====================
-// 🧠 ADD ITEM (FIXED)
+// 🧠 ADD ITEM
 // =====================
 async function addItem() {
   const title = document.getElementById("title").value;
@@ -21,9 +23,9 @@ async function addItem() {
     // 1. Upload image to Supabase Storage
     const fileName = Date.now() + "_" + imageFile.name;
 
-    const { error: uploadError } = await supabase
+    const { error: uploadError } = await client
       .storage
-      .from("images") // must exist
+      .from("images")
       .upload(fileName, imageFile);
 
     if (uploadError) {
@@ -33,7 +35,7 @@ async function addItem() {
     }
 
     // 2. Get public URL
-    const { data: urlData } = supabase
+    const { data: urlData } = client
       .storage
       .from("images")
       .getPublicUrl(fileName);
@@ -41,7 +43,7 @@ async function addItem() {
     const imageUrl = urlData.publicUrl;
 
     // 3. Insert into database
-    const { error } = await supabase
+    const { error } = await client
       .from("items")
       .insert([{
         title,
@@ -60,9 +62,9 @@ async function addItem() {
     }
 
   } catch (err) {
-  console.error("FULL ERROR:", err);
-  alert(err.message || "Something went wrong");
-}
+    console.error("FULL ERROR:", err);
+    alert(err.message || "Something went wrong");
+  }
 }
 
 // =====================
@@ -75,7 +77,7 @@ async function displayItems() {
 
   container.innerHTML = "";
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("items")
     .select("*")
     .order("id", { ascending: false });
