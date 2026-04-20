@@ -14,26 +14,51 @@ async function addItem() {
     return;
   }
 
-  // Convert image to base64
   const reader = new FileReader();
+
   reader.onload = async function () {
-    const imageBase64 = reader.result;
+    const img = new Image();
+    img.src = reader.result;
 
-    const { error } = await supabase
-      .from("items")
-      .insert([{ title, category, location, contact, image: imageBase64 }]);
+    img.onload = async function () {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
-  if (error) {
-  alert(error.message);
-  console.log(error);
-}else {
-      displayItems();
-    }
+      // compress image
+      const maxWidth = 300;
+      const scale = maxWidth / img.width;
+
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const compressedImage = canvas.toDataURL("image/jpeg", 0.5);
+
+      const { error } = await supabase
+        .from("items")
+        .insert([{
+          title,
+          category,
+          location,
+          contact,
+          image: compressedImage
+        }]);
+
+      if (error) {
+        alert(error.message);
+        console.log(error);
+      } else {
+        alert("Upload successful!");
+        displayItems();
+      }
+    };
   };
 
   reader.readAsDataURL(imageFile);
 }
 
+// 🧠 DISPLAY ITEMS
 async function displayItems() {
   const container = document.getElementById("items");
   const search = document.getElementById("search").value.toLowerCase();
