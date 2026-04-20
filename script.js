@@ -23,10 +23,10 @@ async function addItem() {
       .from("items")
       .insert([{ title, category, location, contact, image: imageBase64 }]);
 
-    if (error) {
-      alert("Error uploading");
-      console.log(error);
-    } else {
+  if (error) {
+  alert(error.message);
+  console.log(error);
+}else {
       displayItems();
     }
   };
