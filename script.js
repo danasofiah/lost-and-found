@@ -60,9 +60,9 @@ async function addItem() {
     }
 
   } catch (err) {
-    console.log(err);
-    alert("Something went wrong");
-  }
+  console.error("FULL ERROR:", err);
+  alert(err.message || "Something went wrong");
+}
 }
 
 // =====================
